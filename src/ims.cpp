@@ -4,6 +4,22 @@
 #include <iostream>
 
 
+#define tLab1 0
+#define tCistenie 0
+#define tNormalizacia 0
+#define tPasterizacia 0
+#define tChladenie 0
+#define tLab2 0
+#define tZrazanie 0
+#define tKrajanie 0
+#define tLisovanie 0
+#define tFormovanie 0
+#define tSolenie 0
+#define tChladenie 0
+#define tSklad 0
+
+
+
 Facility Laboratorium1("Laboratorium pre prijem mlieka");
 Facility CistenieL("Cistiaca Linka");
 Facility NormalizaciaL("Normalizacna Linka");
@@ -24,12 +40,14 @@ class Solenie: public Process {
 
         Seize(SolenieL);
         for (int i = 0; i < 3; i++) {
-            Wait(6); // 6-7 hodin, * 60 ak Wait bere minuty :)
-
+            Wait(tSolenie);
         }
         Release(SolenieL);
-        Wait(20); // 20 dni :)
-        Wait(1); // 1 rok :rofl:
+        Wait(tChladenie);
+        Wait(tSklad);
+
+        //TODO STOP
+        Stop();
 
     }
 };
@@ -39,8 +57,7 @@ class Formovanie: public Process {
     void Behavior() {
 
         Seize(FormovanieL);
-        // formovanie
-        Wait(15); // 15-20 min odpocinok
+        Wait(tFormovanie);
         Release(FormovanieL);
 
         (new Formovanie)->Activate();
@@ -48,13 +65,12 @@ class Formovanie: public Process {
     }
 };
 
-
 class Lisovanie: public Process {
 
     void Behavior() {
 
         Seize(LisovanieL);
-        Wait(120); // 120-150 min
+        Wait(tLisovanie);
         Release(LisovanieL);
 
         (new Lisovanie)->Activate();
@@ -63,15 +79,12 @@ class Lisovanie: public Process {
     }
 };
 
-
-
 class Krajanie: public Process {
 
     void Behavior() {
 
         Seize(KrajanieL);
-        // krajanie
-        Wait(5); // 5-10 min odpocinok
+        Wait(tKrajanie);
         Release(KrajanieL);
 
         (new Krajanie)->Activate();
@@ -79,14 +92,12 @@ class Krajanie: public Process {
     }
 };
 
-
-
 class Zrazanie: public Process {
 
     void Behavior() {
 
         Seize(ZrazanieL);
-        Wait(60); // 60-70 min
+        Wait(tZrazanie);
         Release(ZrazanieL);
 
         (new Zrazanie)->Activate();
@@ -94,12 +105,12 @@ class Zrazanie: public Process {
     }
 };
 
-
 class Lab2: public Process {
 
     void Behavior() {
 
         Seize(Laboratorium2);
+        Wait(tLab2);
         Release(Laboratorium2);
 
         (new Lab2)->Activate();
@@ -108,13 +119,12 @@ class Lab2: public Process {
     }
 };
 
-
-
 class Chladenie: public Process {
 
     void Behavior() {
 
         Seize(ChladenieL);
+        Wait(tChladenie);
         Release(ChladenieL);
         (new Chladenie)->Activate();
         (new Lab2)->Activate();
@@ -122,27 +132,24 @@ class Chladenie: public Process {
     }
 };
 
-
 class Pasterizacia: public Process {
 
     void Behavior() {
 
         Seize(PasterizaciaL);
-        Wait(20); // 20-30 min
+        Wait(tPasterizacia);
         Release(PasterizaciaL);
         (new Pasterizacia)->Activate();
         (new Chladenie)->Activate();
     }
 };
 
-
-
-
 class Normalizacia: public Process {
 
     void Behavior() {
 
         Seize(NormalizaciaL);
+        Wait(tNormalizacia);
         Release(NormalizaciaL);
         (new Normalizacia)->Activate();
         (new Pasterizacia)->Activate();
@@ -151,13 +158,12 @@ class Normalizacia: public Process {
 
 };
 
-
-
 class Cistenie: public Process {
 
     void Behavior() {
 
         Seize(CistenieL);
+        Wait(tCistenie);
         Release(CistenieL);
         (new Cistenie)->Activate();
         (new Normalizacia)->Activate();
@@ -166,13 +172,12 @@ class Cistenie: public Process {
 
 };
 
-
-
 class KontrolaKyslosti: public Process {
 
     void Behavior() {
 
         Seize(Laboratorium1);
+        Wait(tLab1);
         Release(Laboratorium1);
 
         (new KontrolaKyslosti)->Activate();
@@ -180,3 +185,20 @@ class KontrolaKyslosti: public Process {
     }
 
 };
+
+
+int main(int argc, char* argv[]) {
+
+    int timespan = 1440 * 365; // implicitni timespan 1 rok
+
+    // init timespan
+    Init(0, timespan);
+
+    // zahajeni vyroby
+    (new KontrolaKyslosti)->Activate();
+
+    // zahajeni simulace
+    Run();
+
+    return EXIT_SUCCESS;
+}
