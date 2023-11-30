@@ -7,7 +7,7 @@ CC = g++
 CFLAGS = -std=c++11 -Wall
 
 # Source file
-SRC = main.cpp
+SRC = ims.cpp
 
 # Output executable
 OUT = ims
