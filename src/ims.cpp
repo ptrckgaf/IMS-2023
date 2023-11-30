@@ -213,6 +213,8 @@ class KontrolaKyslosti: public Process {
 
     void Behavior() {
         
+        Wait(1440); //generator tranzakcii
+
         Seize(Laboratorium1);
         Porucha();
         Wait(tLab1);
