@@ -19,7 +19,7 @@
 #define tSklad 0
 
 
-// linky
+// vyrobne linky
 Facility Laboratorium1("Laboratorium pre prijem mlieka");
 Facility CistenieL("Cistiaca Linka");
 Facility NormalizaciaL("Normalizacna Linka");
