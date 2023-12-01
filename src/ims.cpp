@@ -12,7 +12,8 @@
 
 #define day 1440
 #define hour 60
-#define year 365
+#define month 365 / 12
+#define year 12 * month
 
 std::pair<double, double> tLab = std::make_pair(15, 30);
 std::pair<double, double> tCistenie = std::make_pair(30, 60);
@@ -421,9 +422,13 @@ int main(int argc, char* argv[]) {
     numberOfYears;
     monthsOff;*/
 
-    int timespan = 1440 * (year * numberOfYears - (numberOfYears * monthsOff)); // implicitni timespan 1 rok
+    int nod = (numberOfYears * year) - (month * monthsOff);
 
-    
+    std::cout << nod << std::endl;
+
+    int timespan = day * nod; // implicitni timespan 1 rok
+
+     
 
     // init timespan
     Init(0, timespan);
