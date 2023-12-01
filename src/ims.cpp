@@ -52,18 +52,17 @@ int x = 0;
 
 // pocitadlo transakci
 int transakce = 0;
+int transakce2 = 0;
 int stopcount = INT32_MAX;
 
 class Porucha : public Event{
     void Behavior() {
-
-        
         if (Random() < (pravdepodobnostporuchy))
             porucha = true;
         else
             porucha = false;
-        x++;
-        (new Porucha)->Activate(Time+Exponential(1));
+
+        (new Porucha)->Activate(Time+Exponential(day));
     }
 };
 //########################################################################
@@ -80,14 +79,19 @@ class Solenie: public Process {
         }
         
         Release(SolenieL);
-        Wait(tChladenie2);
-        Wait(tSklad);
 
+        transakce2++;
 
-        if (transakce >= stopcount) {
+        if (transakce2 >= stopcount) {
             std::cout << "STOP" << std::endl;
             Stop();
         }
+
+        Wait(tChladenie2);
+
+        transakce++;
+
+        
     }
     void Porucha() {
         if (porucha) {
@@ -281,7 +285,7 @@ class Cistenie: public Process {
 class KontrolaKyslosti: public Process {
 
     void Behavior() {
-        
+        x++;
         Wait(Exponential(1440)); //generator tranzakcii
 
         Seize(Laboratorium1);
@@ -290,7 +294,11 @@ class KontrolaKyslosti: public Process {
         Release(Laboratorium1);
 
         (new KontrolaKyslosti)->Activate();
-        (new Cistenie)->Activate();
+
+        if (Random() > (0.01))
+            (new Cistenie)->Activate(); 
+        else
+            std::cout << x << std::endl;
     }
     void Porucha() {
         if (porucha) {
@@ -331,5 +339,8 @@ int main(int argc, char* argv[]) {
 
     // print stats
     printStats();
+
+    std::cout << transakce <<std::endl;
+    std::cout << transakce2 - transakce <<std::endl;
     return EXIT_SUCCESS;
 }
