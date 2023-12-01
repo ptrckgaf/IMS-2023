@@ -10,20 +10,23 @@
 #include <string.h>
 #include <iomanip>
 
+#define day 1440
+#define hour 60
 
-#define tLab1 1
-#define tCistenie 2
-#define tNormalizacia 3.1
-#define tPasterizacia 4 
-#define tChladenie1 5
-#define tLab2 6
-#define tZrazanie 7
-#define tKrajanie 8
-#define tLisovanie 9
-#define tFormovanie 10
-#define tSolenie 11
-#define tChladenie2 12
-#define tSklad 13.12
+std::pair<double, double> tLab = std::make_pair(15, 30);
+std::pair<double, double> tCistenie = std::make_pair(30, 60);
+std::pair<double, double> tNormalizacia = std::make_pair(15, 30);
+std::pair<double, double> tPasterizacia = std::make_pair(20.0, 30);
+std::pair<double, double> tChladenie1 = std::make_pair(30, 60);
+std::pair<double, double> tLab2 = std::make_pair(10, 15);
+std::pair<double, double> tZrazanie = std::make_pair(60, 70);
+std::pair<double, double> tKrajanie = std::make_pair(5, 10);
+std::pair<double, double> tLisovanie = std::make_pair(120, 150);
+std::pair<double, double> tFormovanie = std::make_pair(15, 20);
+std::pair<double, double> tSolenie = std::make_pair(hour * 6, hour * 7);
+double tChladenie2 = day * 20;
+double tSklad = day * 365;
+
 
 #define tObsluhaPoruchy 10
 
@@ -40,8 +43,11 @@ Facility LisovanieL("Lisovacia Linka");
 Facility FormovanieL("Formovacia Linka");
 Facility SolenieL("Soliaca Linka");
 
+
 bool porucha = false;
-int pravdepodobnostporuchy = 50;
+double pravdepodobnostporuchy = 0.1;
+
+int x = 0;
 
 
 // pocitadlo transakci
@@ -51,12 +57,13 @@ int stopcount = INT32_MAX;
 class Porucha : public Event{
     void Behavior() {
 
-        if (Random() < (pravdepodobnostporuchy / 100))
+        
+        if (Random() < (pravdepodobnostporuchy))
             porucha = true;
         else
             porucha = false;
-
-        (new Porucha)->Activate(Time+Exponential(1440));
+        x++;
+        (new Porucha)->Activate(Time+Exponential(1));
     }
 };
 //########################################################################
@@ -67,8 +74,9 @@ class Solenie: public Process {
     void Behavior() {
 
         Seize(SolenieL);
+        Porucha();
         for (int i = 0; i < 3; i++) {
-            Wait(tSolenie);
+            Wait(Uniform(tSolenie.first, tSolenie.second));
         }
         
         Release(SolenieL);
@@ -81,6 +89,12 @@ class Solenie: public Process {
             Stop();
         }
     }
+    void Porucha() {
+        if (porucha) {
+            Wait(tObsluhaPoruchy);
+            porucha = false;
+        }
+    }
 };
 
 class Formovanie: public Process {
@@ -88,11 +102,18 @@ class Formovanie: public Process {
     void Behavior() {
 
         Seize(FormovanieL);
-        Wait(tFormovanie);
+        Porucha();
+        Wait(Uniform(tFormovanie.first, tFormovanie.second));
         Release(FormovanieL);
 
-        (new Formovanie)->Activate();
+        //(new Formovanie)->Activate();
         (new Solenie)->Activate();
+    }
+    void Porucha() {
+        if (porucha) {
+            Wait(tObsluhaPoruchy);
+            porucha = false;
+        }
     }
 };
 
@@ -101,12 +122,19 @@ class Lisovanie: public Process {
     void Behavior() {
 
         Seize(LisovanieL);
-        Wait(tLisovanie);
+        Porucha();
+        Wait(Uniform(tLisovanie.first, tLisovanie.second));
         Release(LisovanieL);
 
-        (new Lisovanie)->Activate();
+        //(new Lisovanie)->Activate();
         (new Formovanie)->Activate();
 
+    }
+    void Porucha() {
+        if (porucha) {
+            Wait(tObsluhaPoruchy);
+            porucha = false;
+        }
     }
 };
 
@@ -115,11 +143,18 @@ class Krajanie: public Process {
     void Behavior() {
 
         Seize(KrajanieL);
-        Wait(tKrajanie);
+        Porucha();
+        Wait(Uniform(tKrajanie.first, tKrajanie.second));
         Release(KrajanieL);
 
-        (new Krajanie)->Activate();
+        //(new Krajanie)->Activate();
         (new Lisovanie)->Activate();
+    }
+    void Porucha() {
+        if (porucha) {
+            Wait(tObsluhaPoruchy);
+            porucha = false;
+        }
     }
 };
 
@@ -128,11 +163,18 @@ class Zrazanie: public Process {
     void Behavior() {
 
         Seize(ZrazanieL);
-        Wait(tZrazanie);
+        Porucha();
+        Wait(Uniform(tZrazanie.first, tZrazanie.second));
         Release(ZrazanieL);
 
-        (new Zrazanie)->Activate();
+        //(new Zrazanie)->Activate();
         (new Krajanie)->Activate();
+    }
+    void Porucha() {
+        if (porucha) {
+            Wait(tObsluhaPoruchy);
+            porucha = false;
+        }
     }
 };
 
@@ -141,12 +183,19 @@ class Lab2: public Process {
     void Behavior() {
 
         Seize(Laboratorium2);
-        Wait(tLab2);
+        Porucha();
+        Wait(Uniform(tLab2.first, tLab2.second));
         Release(Laboratorium2);
 
-        (new Lab2)->Activate();
+        //(new Lab2)->Activate();
         (new Zrazanie)->Activate();
 
+    }
+    void Porucha() {
+        if (porucha) {
+            Wait(tObsluhaPoruchy);
+            porucha = false;
+        }
     }
 };
 
@@ -155,11 +204,18 @@ class Chladenie: public Process {
     void Behavior() {
 
         Seize(ChladenieL);
-        Wait(tChladenie1);
+        Porucha();
+        Wait(Uniform(tChladenie1.first, tChladenie1.second));
         Release(ChladenieL);
-        (new Chladenie)->Activate();
+        //(new Chladenie)->Activate();
         (new Lab2)->Activate();
 
+    }
+    void Porucha() {
+        if (porucha) {
+            Wait(tObsluhaPoruchy);
+            porucha = false;
+        }
     }
 };
 
@@ -168,10 +224,17 @@ class Pasterizacia: public Process {
     void Behavior() {
 
         Seize(PasterizaciaL);
-        Wait(tPasterizacia);
+        Porucha();
+        Wait(Uniform(tPasterizacia.first, tPasterizacia.second));
         Release(PasterizaciaL);
-        (new Pasterizacia)->Activate();
+        //(new Pasterizacia)->Activate();
         (new Chladenie)->Activate();
+    }
+    void Porucha() {
+        if (porucha) {
+            Wait(tObsluhaPoruchy);
+            porucha = false;
+        }
     }
 };
 
@@ -180,11 +243,17 @@ class Normalizacia: public Process {
     void Behavior() {
 
         Seize(NormalizaciaL);
-        Wait(tNormalizacia);
+        Porucha();
+        Wait(Uniform(tNormalizacia.first, tNormalizacia.second));
         Release(NormalizaciaL);
-        (new Normalizacia)->Activate();
+        //(new Normalizacia)->Activate();
         (new Pasterizacia)->Activate();
-
+    }
+    void Porucha() {
+        if (porucha) {
+            Wait(tObsluhaPoruchy);
+            porucha = false;
+        }
     }
 
 };
@@ -195,9 +264,9 @@ class Cistenie: public Process {
 
         Seize(CistenieL);
         Porucha();
-        Wait(tCistenie);
+        Wait(Uniform(tCistenie.first, tCistenie.second));
         Release(CistenieL);
-        (new Cistenie)->Activate();
+        //(new Cistenie)->Activate();
         (new Normalizacia)->Activate();   
     }
     void Porucha() {
@@ -213,11 +282,11 @@ class KontrolaKyslosti: public Process {
 
     void Behavior() {
         
-        Wait(1440); //generator tranzakcii
+        Wait(Exponential(1440)); //generator tranzakcii
 
         Seize(Laboratorium1);
         Porucha();
-        Wait(tLab1);
+        Wait(Uniform(tLab.first, tLab.second));
         Release(Laboratorium1);
 
         (new KontrolaKyslosti)->Activate();
@@ -256,12 +325,11 @@ int main(int argc, char* argv[]) {
 
     // zahajeni vyroby
     (new KontrolaKyslosti)->Activate();
-
+    (new Porucha)->Activate();
     // zahajeni simulace
     Run();
 
     // print stats
     printStats();
-
     return EXIT_SUCCESS;
 }
