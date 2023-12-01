@@ -423,9 +423,6 @@ int main(int argc, char* argv[]) {
     monthsOff;*/
 
     int nod = (numberOfYears * year) - (month * monthsOff);
-
-    std::cout << nod << std::endl;
-
     int timespan = day * nod; // implicitni timespan 1 rok
 
      
