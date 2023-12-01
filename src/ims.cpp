@@ -403,7 +403,7 @@ void printStats(){
 
     Laboratorium1.Output();
     CistenieL.Output();
-    /* NormalizaciaL.Output();
+    NormalizaciaL.Output();
     PasterizaciaL.Output();
     ChladenieL.Output();
     Laboratorium2.Output();
@@ -411,7 +411,7 @@ void printStats(){
     KrajanieL.Output();
     LisovanieL.Output();
     FormovanieL.Output();
-    SolenieL.Output(); */
+    SolenieL.Output();
 }
 
 // -------------------------------------------======== MAIN =========----------------------------------------------------
