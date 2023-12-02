@@ -51,10 +51,12 @@ Facility SolenieL("Soliaca Linka");
 
 
 bool porucha = false;
+bool off = true;
 
 int x = 0;
+int bazen = 3;
 
-
+double fullTime;
 
 
 // pocitadlo transakci
@@ -74,12 +76,13 @@ class Porucha : public Event{
 class Solenie: public Process {
 
     bool trash;
+    
 
     void Behavior() {
 
         Seize(SolenieL);
         Porucha();
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < (4 - bazen); i++) {
             Wait(Uniform(tSolenie.first, tSolenie.second));
         }
         
@@ -100,6 +103,13 @@ class Solenie: public Process {
             std::cout << "STOP" << std::endl;
             Stop();
         }
+
+        if (off)
+        {
+            fullTime = Time;
+            off = false;
+        }
+        
 
         Wait(tChladenie2);
 
@@ -413,6 +423,14 @@ void printStats(){
     LisovanieL.Output();
     FormovanieL.Output();
     SolenieL.Output();
+
+    int hours = static_cast<int>(fullTime / 60);
+    int minutes = static_cast<int>(fullTime) % 60;
+
+
+    std::cout << "Exit transakce: " << transakce <<std::endl;
+    std::cout << "Transakce na sklade: " << transakce2 - transakce <<std::endl;
+    std::cout << "Full time: " << hours << ":" << minutes << std::endl;
 }
 
 // -------------------------------------------======== MAIN =========----------------------------------------------------
@@ -421,6 +439,7 @@ int main(int argc, char* argv[]) {
     /*failProbabilityDays;
     numberOfYears;
     monthsOff;*/
+    bazen = 3;
 
     int nod = (numberOfYears * year) - (month * monthsOff);
     int timespan = day * nod; // implicitni timespan 1 rok
@@ -439,7 +458,6 @@ int main(int argc, char* argv[]) {
     // print stats
     printStats();
 
-    std::cout << "Exit transakce: " << transakce <<std::endl;
-    std::cout << "Transakce na sklade: " << transakce2 - transakce <<std::endl;
+
     return EXIT_SUCCESS;
 }
