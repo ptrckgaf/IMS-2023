@@ -32,7 +32,7 @@ double tSklad = day * 365;
 int numberOfYears = 1;
 int monthsOff = 3;
 int failProbabilityDays = 1;
-
+int bazen = 3;
 
 #define tObsluhaPoruchy 30
 
@@ -54,7 +54,7 @@ bool porucha = false;
 bool off = true;
 
 int x = 0;
-int bazen = 3;
+
 
 double fullTime;
 
@@ -433,13 +433,45 @@ void printStats(){
     std::cout << "Full time: " << hours << ":" << minutes << std::endl;
 }
 
+// Function to set global variables from command line arguments
+void setupGlobalVariablesFromArgs(int argc, char* argv[]) {
+    for (int i = 1; i < argc; ++i) {
+        if (argv[i][0] == '-') {
+            switch (argv[i][1]) {
+                case 'y':
+                    numberOfYears = std::atoi(argv[++i]);
+                    break;
+                case 'm':
+                    monthsOff = std::atoi(argv[++i]);
+                    break;
+                case 'f':
+                    failProbabilityDays = std::atoi(argv[++i]);
+                    break;
+                case 'b':
+                    bazen = std::atoi(argv[++i]);
+                    break;
+                case 'h':
+                    // Display usage information
+                    std::cout << "Usage: " << argv[0] << " [-y <years>] [-m <months off>] [-f <failProbability in days>] [-b <number of pools for salt>] [-h]" << std::endl;
+                    std::exit(0);
+                default:
+                    std::cerr << "Unknown option: " << argv[i] << std::endl;
+                    std::exit(1);
+            }
+        } else {
+            std::cerr << "Invalid argument: " << argv[i] << std::endl;
+            std::exit(1);
+        }
+    }
+}
+
+
+
+
 // -------------------------------------------======== MAIN =========----------------------------------------------------
 int main(int argc, char* argv[]) {
 
-    /*failProbabilityDays;
-    numberOfYears;
-    monthsOff;*/
-    bazen = 3;
+    setupGlobalVariablesFromArgs(argc, argv);
 
     int nod = (numberOfYears * year) - (month * monthsOff);
     int timespan = day * nod; // implicitni timespan 1 rok
